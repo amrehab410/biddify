@@ -3,7 +3,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, UserMixin, login_user, current_user, logout_user, login_required
 from flask_cors import CORS
-from forms import RegistrationForm, LoginForm
 from config import Config
 
 app = Flask(__name__)
@@ -20,10 +19,10 @@ def load_user(user_id):
     return User.query.get(int(user_id))
 
 class User(db.Model, UserMixin):
-    id = db.Coloumn(db.Integer, primary_key = True)
-    username = db.Coloumn(db.String(20), unique = True, nullable = False)
-    email = db.Coloumn(db.String(120), unique = True, nullable = False)
-    password = db.Coloumn(db.String(60), nullable = False)
+    id = db.Column(db.Integer, primary_key = True)
+    username = db.Column(db.String(20), unique = True, nullable = False)
+    email = db.Column(db.String(120), unique = True, nullable = False)
+    password = db.Column(db.String(60), nullable = False)
 
     def __repr__(self):
         return f"User('{self.username}', '{eslf.email}')"
@@ -31,13 +30,29 @@ class User(db.Model, UserMixin):
 @app.route("/register", methods = ['POST'])
 def register():
     data = request.get_json()
-    user = User.query.filter_by(email = data['email']).first()
-    if user and bcrypt.check_password_hash(user.password, data['password']):
+    hashed_password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
+    user = User(username = data['username'], email = data['email'], password = hashed_password)
+    db.session.add(user)
+    db.session.commit()
+    return jsonify({"message": "User registered successfully"}), 201
+    
+"""
+if user and bcrypt.check_password_hash(user.password, data['password']):
         login_user(user, remember = data.get('remember', False))
         return jsonify({"message": "Login Successful"}), 200
     else:
         return jsonify({"message": "Login Unsuccessful. Please check email and password"})
 
+"""
+@app.route("/login", methods=['POST'])
+def login():
+    data = request.get_json()
+    user = User.query.filter_by(email=data['email']).first()
+    if user and bcrypt.check_password_hash(user.password, data['password']):
+        login_user(user, remember=data.get('remember', False))
+        return jsonify({"message": "Login successful"}), 200
+    else:
+        return jsonify({"message": "Login Unsuccessful. Please check email and password"}), 401
 
 @app.route("/logout", methods = ['POST'])
 @login_required
