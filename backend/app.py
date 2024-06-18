@@ -25,7 +25,7 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(60), nullable = False)
 
     def __repr__(self):
-        return f"User('{self.username}', '{eslf.email}')"
+        return f"User('{self.username}', '{self.email}')"
 
 @app.route("/register", methods = ['POST'])
 def register():
