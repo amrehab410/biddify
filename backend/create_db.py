@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, ForeignKey, Date
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
+from config import Config
 
 Base = declarative_base()
 
@@ -62,7 +63,7 @@ class UserAuction(Base):
 
 # Create an engine
 # Replace 'username', 'password', 'hostname', and 'database_name' with your MySQL credentials and database name.
-engine = create_engine('mysql+mysqldb://ahmedhesham:Ahmed.123@localhost/biddify_db')
+engine = create_engine(Config.SQLALCHEMY_DATABASE_URI)
 
 # Create all tables in the engine
 Base.metadata.create_all(engine)

@@ -16,39 +16,35 @@ CORS(app)
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return Users.query.get(int(user_id))
 
-class User(db.Model, UserMixin):
-    id = db.Column(db.Integer, primary_key = True)
-    username = db.Column(db.String(20), unique = True, nullable = False)
+class Users(db.Model, UserMixin):
+    user_id = db.Column(db.Integer, primary_key = True)
+    first_name = db.Column(db.String(20), nullable = False)
+    last_name = db.Column(db.String(20), nullable = False)
+    phone_no = db.Column(db.String(20), unique = True, nullable = False)
     email = db.Column(db.String(120), unique = True, nullable = False)
-    password = db.Column(db.String(60), nullable = False)
+    password_hash = db.Column(db.String(60), nullable = False)
+    def get_id(self):
+           return (self.user_id)
 
     def __repr__(self):
-        return f"User('{self.username}', '{self.email}')"
+        return f"User('{self.first_name}','{self.last_name}', '{self.email}')"
 
 @app.route("/register", methods = ['POST'])
 def register():
     data = request.get_json()
     hashed_password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
-    user = User(username = data['username'], email = data['email'], password = hashed_password)
-    db.session.add(user)
+    users = Users(first_name = data['first_name'], last_name = data['last_name'], phone_no = data['phone_num'], email = data['email'], password_hash = data['password'])
+    db.session.add(users)
     db.session.commit()
     return jsonify({"message": "User registered successfully"}), 201
     
-"""
-if user and bcrypt.check_password_hash(user.password, data['password']):
-        login_user(user, remember = data.get('remember', False))
-        return jsonify({"message": "Login Successful"}), 200
-    else:
-        return jsonify({"message": "Login Unsuccessful. Please check email and password"})
-
-"""
 @app.route("/login", methods=['POST'])
 def login():
     data = request.get_json()
-    user = User.query.filter_by(email=data['email']).first()
-    if user and bcrypt.check_password_hash(user.password, data['password']):
+    user = Users.query.filter_by(email=data['email']).first()
+    if user and (user.password_hash == data['password']):
         login_user(user, remember=data.get('remember', False))
         return jsonify({"message": "Login successful"}), 200
     else:

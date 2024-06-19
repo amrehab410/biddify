@@ -1,3 +1,4 @@
+import { loginUser } from "../api/auth";
 import "./style/login.css";
 import { useState } from "react";
 
@@ -16,9 +17,16 @@ function Login() {
 
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        alert("Account created!");
+        const userData = { email, password: password.value };
+        const response = await loginUser(userData);
+        if (response.message === "Login successful") {
+            alert("Account logged in!");
+            clearForm();
+        } else {
+            alert("Error logging in!");
+        }
         clearForm();
     };
 

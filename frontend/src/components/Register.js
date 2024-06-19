@@ -1,5 +1,7 @@
 import "./style/register.css";
 import { useState } from "react";
+import { registerUser } from '../api/auth';
+
 import { useNavigate } from "react-router-dom";
 
 const PasswordErrorMessage = () => {
@@ -17,17 +19,17 @@ const EmailErrorMessage = () => {
 function Register() {
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
-    const [email, setEmail] = useState({ value: "", isTouched: false });
+    const [email, setEmail] = useState("");
     const [phoneNo, setPhoneNo] = useState("");
-    const [password, setPassword] = useState({ value: "", isTouched: false });
+    const [password, setPassword] = useState("");
     const navigate = useNavigate();
 
     const clearForm = () => {
         setFirstName("");
         setLastName("");
-        setEmail({ value: "", isTouched: false });
+        setEmail("");
         setPhoneNo("");
-        setPassword({ value: "", isTouched: false });
+        setPassword("");
     };
 
     const validateEmail = (email) => {
@@ -40,13 +42,15 @@ function Register() {
         return passwordRegex.test(password);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (firstName && validateEmail(email.value) && validatePassword(password.value) && phoneNo) {
+        const userData = { first_name: firstName, last_name: lastName, phone_num: phoneNo, email: email, password: password.value };
+        const response = await registerUser(userData);
+        if (response.message === "User registered successfully") {
             alert("Account created!");
             clearForm();
         } else {
-            alert("Please fill out the form correctly.");
+            alert("Error creating account");
         }
     };
 
@@ -88,19 +92,15 @@ function Register() {
                             Email address <sup>*</sup>
                         </label>
                         <input
-                            value={email.value}
+                            value={email}
                             onChange={(e) => {
-                                setEmail({ ...email, value: e.target.value });
+                                setEmail(e.target.value);
                             }}
-                            onBlur={() => {
-                                setEmail({ ...email, isTouched: true });
-                            }}
+
                             placeholder="Email address"
                             required
                         />
-                        {email.isTouched && !validateEmail(email.value) ? (
-                            <EmailErrorMessage />
-                        ) : null}
+
                     </div>
                     <div className="Field">
                         <label>
@@ -112,15 +112,11 @@ function Register() {
                             onChange={(e) => {
                                 setPassword({ ...password, value: e.target.value });
                             }}
-                            onBlur={() => {
-                                setPassword({ ...password, isTouched: true });
-                            }}
+
                             placeholder="Password"
                             required
                         />
-                        {password.isTouched && !validatePassword(password.value) ? (
-                            <PasswordErrorMessage />
-                        ) : null}
+
                     </div>
                     <div className="Field">
                         <label>
