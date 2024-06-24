@@ -8,7 +8,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   const redirectToCreateAuction = () => {
-    navigate("/CreateAuction");
+    navigate("/create-auction");
   };
 
   return (
