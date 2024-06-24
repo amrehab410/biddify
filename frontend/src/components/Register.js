@@ -64,7 +64,7 @@ function Register() {
                 <fieldset>
                     <h2>Sign Up</h2>
                     <div className="Field">
-                        <label>
+                        <label className="label">
                             First name <sup>*</sup>
                         </label>
                         <input
@@ -77,7 +77,7 @@ function Register() {
                         />
                     </div>
                     <div className="Field">
-                        <label>Last name</label>
+                        <label className="label">Last name</label>
                         <input
                             value={lastName}
                             onChange={(e) => {
@@ -88,7 +88,7 @@ function Register() {
                         />
                     </div>
                     <div className="Field">
-                        <label>
+                        <label className="label">
                             Email address <sup>*</sup>
                         </label>
                         <input
@@ -103,7 +103,7 @@ function Register() {
 
                     </div>
                     <div className="Field">
-                        <label>
+                        <label className="label">
                             Password <sup>*</sup>
                         </label>
                         <input
@@ -119,7 +119,7 @@ function Register() {
 
                     </div>
                     <div className="Field">
-                        <label>
+                        <label className="label">
                             Phone Number <sup>*</sup>
                         </label>
                         <input
@@ -132,8 +132,8 @@ function Register() {
                         />
                     </div>
 
-                    <button type="submit">Create account</button>
-                    <button type="button" onClick={redirectToLogin}>Go to Login</button>
+                    <button type="submit" className="button">Create account</button>
+                    <button type="button" onClick={redirectToLogin} className="button">Go to Login</button>
                 </fieldset>
             </form>
         </div>
