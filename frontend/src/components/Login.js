@@ -19,13 +19,14 @@ function Login() {
         e.preventDefault();
         const userData = { email, password: password.value };
         const response = await loginUser(userData);
+        console.log(response)
         if (response.message === "Login successful") {
             alert("Account logged in!");
             clearForm();
             localStorage.setItem('authToken', response.token);
             localStorage.setItem('userEmail', email);
             setAuthState({ isAuthenticated: true, token: response.token, email: email });
-            navigate('/dashboard'); // Redirect to dashboard
+            navigate('/dashboard');
         } else {
             alert("Error logging in!");
         }
