@@ -3,19 +3,23 @@ import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 const Logout = () => {
-    const { setAuthState } = useContext(AuthContext);
-    const navigate = useNavigate();
+  const { setAuthState } = useContext(AuthContext);
+  const navigate = useNavigate();
 
-    const handleLogout = () => {
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('userEmail');
-        setAuthState({ isAuthenticated: false, token: null, email: null });
-        navigate('/login');
-    };
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("userEmail");
+    setAuthState({ isAuthenticated: false, token: null, email: null });
+    navigate("/login");
+  };
 
-    return (
-        <button onClick={handleLogout}>Logout</button>
-    );
+  return (
+    <footer>
+      <button onClick={handleLogout} className="button">
+        Logout
+      </button>
+    </footer>
+  );
 };
 
 export default Logout;
