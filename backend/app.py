@@ -5,6 +5,7 @@ from flask_login import LoginManager, UserMixin, login_user, current_user, logou
 from flask_cors import CORS
 from config import Config
 
+
 app = Flask(__name__)
 app.config.from_object(Config)
 db = SQLAlchemy(app)
@@ -14,22 +15,90 @@ login_manager.login_view = 'login'
 login_manager.login_message_category = 'info'
 CORS(app)
 
+class Users(db.Model, UserMixin):
+    __tablename__ = 'users'
+    user_id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(255), nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
+    first_name = db.Column(db.String(255), nullable=False)
+    last_name = db.Column(db.String(255), nullable=False)
+    phone_no = db.Column(db.String(255), nullable=False)
+    auctions = db.relationship("Auctions", back_populates="auctioneer")
+    bids = db.relationship("Bids", back_populates="bidder")
+    payments = db.relationship("Payments", back_populates="user")
+    user_auctions = db.relationship("UserAuctions", back_populates="user")
+
+    def get_id(self):
+        return self.user_id
+
+    def __repr__(self):
+        return f"User('{self.first_name}', '{self.last_name}', '{self.email}')"
+
+
+class Auctions(db.Model):
+    __tablename__ = 'auctions'
+    auction_id = db.Column(db.Integer, primary_key=True)
+    auctioneer_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
+    title = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.String(255), nullable=False)
+    start_time = db.Column(db.DateTime, nullable=False)
+    end_time = db.Column(db.DateTime, nullable=False)
+    starting_bid = db.Column(db.Float, nullable=False)
+    current_bid = db.Column(db.Float, nullable=True)
+    auctioneer = db.relationship("Users", back_populates="auctions")
+    bids = db.relationship("Bids", back_populates="auction")
+    user_auctions = db.relationship("UserAuctions", back_populates="auction")
+
+    def __repr__(self):
+        return f"Auction('{self.title}', '{self.start_time}', '{self.end_time}')"
+
+
+class Bids(db.Model):
+    __tablename__ = 'bids'
+    bid_id = db.Column(db.Integer, primary_key=True)
+    auction_id = db.Column(db.Integer, db.ForeignKey('auctions.auction_id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
+    bid_amount = db.Column(db.Float, nullable=False)
+    bid_time = db.Column(db.DateTime, nullable=False)
+    auction = db.relationship("Auctions", back_populates="bids")
+    bidder = db.relationship("Users", back_populates="bids")
+
+    def __repr__(self):
+        return f"Bid('{self.bid_amount}', '{self.bid_time}')"
+
+
+class Payments(db.Model):
+    __tablename__ = 'payments'
+    payment_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
+    payment_amount = db.Column(db.Float, nullable=False)
+    payment_time = db.Column(db.DateTime, nullable=False)
+    payment_method = db.Column(db.String(255), nullable=False)
+    card_number = db.Column(db.String(255), nullable=True)
+    expiry_date = db.Column(db.Date, nullable=True)
+    user = db.relationship("Users", back_populates="payments")
+
+    def __repr__(self):
+        return f"Payment('{self.payment_amount}', '{self.payment_time}')"
+
+
+class UserAuctions(db.Model):
+    __tablename__ = 'user_auctions'
+    user_auction_id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
+    auction_id = db.Column(db.Integer, db.ForeignKey('auctions.auction_id'), nullable=False)
+    user = db.relationship("Users", back_populates="user_auctions")
+    auction = db.relationship("Auctions", back_populates="user_auctions")
+
+    def __repr__(self):
+        return f"UserAuction('User ID: {self.user_id}', 'Auction ID: {self.auction_id}')"
+
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return Users.query.get(int(user_id))
 
-class Users(db.Model, UserMixin):
-    user_id = db.Column(db.Integer, primary_key = True)
-    first_name = db.Column(db.String(20), nullable = False)
-    last_name = db.Column(db.String(20), nullable = False)
-    phone_no = db.Column(db.String(20), unique = True, nullable = False)
-    email = db.Column(db.String(120), unique = True, nullable = False)
-    password_hash = db.Column(db.String(60), nullable = False)
-    def get_id(self):
-           return (self.user_id)
-
-    def __repr__(self):
-        return f"User('{self.first_name}','{self.last_name}', '{self.email}')"
 
 @app.route("/register", methods = ['POST'])
 def register():
@@ -50,11 +119,33 @@ def login():
     else:
         return jsonify({"message": "Login Unsuccessful. Please check email and password"}), 401
 
+@app.route("/create-auction", methods=['POST'])
+def create_auction():
+    data = request.get_json()
+    print(data)
+    user = Users.query.filter_by(email=data['email']).first()
+    auction = Auctions(auctioneer_id= user.user_id, title = data['title'],
+                       description=data['description'], start_time = data['startTime'],
+                       end_time = data['endTime'], starting_bid = data['startBid'], current_bid = 0)
+    db.session.add(auction)
+    db.session.commit()
+    return jsonify({"message": "Auction created successfully"}), 201
+
+
 @app.route("/logout", methods = ['POST'])
 @login_required
 def logout():
     logout_user()
     return jsonify({"message": "Logout Successful"}), 200
-
 if __name__ == '__main__':
     app.run(debug= True, port=9000)
+
+@app.route("/dashboard", methods=['POST'])
+def fetch_auctions():
+    print("hellooooooooooooooooooooooooooooo")
+    data = request.get_json()
+    print(data)
+    user = Users.query.filter_by(email=data['email']).first()
+    auctions = Auctions.query.filter_by(auctioneer_id=user.user_id)
+    return jsonify({data: auctions}), 200
+

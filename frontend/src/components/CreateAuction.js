@@ -1,15 +1,20 @@
 import React, { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
 import Logout from "./Logout";
+import { useNavigate } from "react-router-dom";
+import { createAuction } from "../api/auth";
 
 const CreateAuction = () => {
   const [auctions, setAuctions] = useState([]);
   const { authState } = useContext(AuthContext);
   const [title, setTitle] = useState("");
+  const [email, setEmail] = useState(localStorage.getItem('userEmail'));
   const [description, setDescription] = useState("");
   const [endTime, setEndTime] = useState("");
-  const [startBid, setStartBid] = useState("");
+  const [startBid, setStartBid] = useState(0);
   const [remainingTimes, setRemainingTimes] = useState([]);
+  const navigate = useNavigate();
+
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -23,6 +28,7 @@ const CreateAuction = () => {
   }, [auctions]);
 
   function handleAddAuction(auction) {
+
     setAuctions(auctions => [...auctions, auction]);
     setRemainingTimes(remainingTimes => [
       ...remainingTimes,
@@ -30,27 +36,39 @@ const CreateAuction = () => {
     ]);
   }
 
-  function handleSubmit(e) {
+  const clearForm = () => {
+    setTitle("");
+    setDescription("");
+    setEndTime("");
+    setStartBid("");
+  };
+
+  const handleSubmit = async (e) => {
+
     e.preventDefault();
     if (!title || !description || !endTime || !startBid) {
       alert("Please fill out all fields.");
       return;
     }
-
     const newAuction = {
       title,
+      email,
       description,
       endTime,
       startBid,
-      startTime: new Date().toISOString()
+      startTime: new Date().toISOString().slice(0, 19).replace('T', ' ')
     };
 
-    handleAddAuction(newAuction);
-    setTitle("");
-    setDescription("");
-    setEndTime("");
-    setStartBid("");
-  }
+    const response = await createAuction(newAuction);
+    if (response.message === "Auction created successfully") {
+      alert("Auction created!");
+      handleAddAuction(newAuction);
+      clearForm();
+      navigate("/dashboard")
+    } else {
+      alert("Error creating auction");
+    }
+  };
 
   function calculateRemainingTime(endTime) {
     const end = new Date(endTime);
@@ -93,7 +111,7 @@ const CreateAuction = () => {
             Starting Bid <sup>*</sup>
           </label>
           <input
-            type="text"
+            type="number"
             placeholder="Starting Bid ..."
             value={startBid}
             onChange={e => setStartBid(e.target.value)}
