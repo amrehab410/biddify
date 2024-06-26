@@ -1,0 +1,9 @@
+.auctions-page {
+  padding: 16px;
+}
+
+.auctions-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}

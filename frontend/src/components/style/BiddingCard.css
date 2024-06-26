@@ -1,0 +1,68 @@
+.auction-card {
+    background-color: #0e101c;
+    border: 2px solid #23d6f5;
+    padding: 24px;
+    margin: 16px;
+    border-radius: 12px;
+    color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s;
+  }
+  
+  .auction-card:hover {
+    transform: scale(1.02);
+  }
+  
+  .auction-title {
+    font-size: 1.75em;
+    margin-bottom: 12px;
+    color: #23d6f5;
+  }
+  
+  .auction-description {
+    font-size: 1em;
+    margin-bottom: 12px;
+    color: #d3d3d3;
+  }
+  
+  .auction-start-bid,
+  .auction-current-bid,
+  .auction-end-time {
+    font-size: 1em;
+    margin-bottom: 8px;
+  }
+  
+  .auction-start-bid::before,
+  .auction-current-bid::before,
+  .auction-end-time::before {
+    content: "• ";
+    color: #23d6f5;
+  }
+  
+  .auction-bid-input {
+    width: 100%;
+    padding: 8px;
+    margin-top: 8px;
+    border-radius: 8px;
+    border: 1px solid #23d6f5;
+    background-color: #1b1e2d;
+    color: #ffffff;
+    font-size: 1em;
+  }
+  
+  .auction-bid-button {
+    width: 100%;
+    padding: 12px;
+    margin-top: 8px;
+    border-radius: 8px;
+    border: none;
+    background-color: #23d6f5;
+    color: #0e101c;
+    font-size: 1em;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+  
+  .auction-bid-button:hover {
+    background-color: #1dabc4;
+  }
