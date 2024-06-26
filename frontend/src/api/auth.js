@@ -9,3 +9,9 @@ export const createAuction = async (auctionData) => request('/create-auction', '
 export const logoutUser = () => request('/logout', 'POST');
 
 export const fetchAuctions = async (email) => request('/dashboard', 'POST', email);
+
+export const fetchAllAuctions = async (email) => request('/auctions-page', 'POST', email);
+
+export const placeBid = async (userData) => request('/place-bid', 'POST', userData);
+
+

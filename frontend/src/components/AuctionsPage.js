@@ -3,53 +3,41 @@ import { AuthContext } from "../context/AuthContext";
 import AuctionCard from "./AuctionCard";
 import "./style/AuctionsPage.css";
 import BiddingCard from "./BiddingCard";
+import { fetchAllAuctions } from "../api/auth";
 
-const auctions = [
-  {
-    title: "Vintage Camera",
-    description: "A rare vintage camera in excellent condition.",
-    startBid: 100,
-    currentBid: 150,
-    endTime: "2024-07-01T12:00:00Z",
-  },
-  {
-    title: "Antique Vase",
-    description: "An exquisite antique vase from the 19th century.",
-    startBid: 200,
-    currentBid: 250,
-    endTime: "2024-07-02T15:00:00Z",
-  },
-];
+
 
 const AuctionsPage = () => {
   const { authState } = useContext(AuthContext);
+  const [email, setEmail] = useState(localStorage.getItem("userEmail"));
+  const [auctions, setAuction] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await fetchAllAuctions(email);
+        setAuction(res)
+      } catch (error) {
+        console.error("Error fetching auctions:", error);
+      }
+    };
+
+    fetchData();
+  }, [email]);
 
   return (
     <div className="auctions-page">
       <h1>Available Auctions</h1>
       <div className="auctions-list">
         {auctions.length === 0 && <p>No auctions available</p>}
-        {auctions.map((auction, index) => (
-          <AuctionCard
-            key={index}
-            title={auction.title}
-            description={auction.description}
-            startBid={auction.startBid}
-            currentBid={auction.currentBid}
-            endTime={auction.endTime}
-          />
-        ))}
-      </div>
-      <div className="auctions-list">
-        {auctions.length === 0 && <p>No auctions available</p>}
-        {auctions.map((auction, index) => (
+        {auctions.map((auction) => (
           <BiddingCard
-            key={index}
+            auction_id={auction.auction_id}
             title={auction.title}
             description={auction.description}
-            startBid={auction.startBid}
-            currentBid={auction.currentBid}
-            endTime={auction.endTime}
+            startBid={auction.starting_bid}
+            currentBid={auction.current_bid}
+            endTime={auction.end_time}
           />
         ))}
       </div>

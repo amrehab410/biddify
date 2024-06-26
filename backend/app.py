@@ -4,6 +4,10 @@ from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, UserMixin, login_user, current_user, logout_user, login_required
 from flask_cors import CORS
 from config import Config
+from flask import Response
+from sqlalchemy import not_
+
+
 
 
 app = Flask(__name__)
@@ -14,6 +18,11 @@ login_manager = LoginManager(app)
 login_manager.login_view = 'login'
 login_manager.login_message_category = 'info'
 CORS(app)
+
+@app.before_request
+def basic_authentication():
+    if request.method.lower() == 'options':
+        return Response()
 
 class Users(db.Model, UserMixin):
     __tablename__ = 'users'
@@ -48,6 +57,18 @@ class Auctions(db.Model):
     auctioneer = db.relationship("Users", back_populates="auctions")
     bids = db.relationship("Bids", back_populates="auction")
     user_auctions = db.relationship("UserAuctions", back_populates="auction")
+
+    def to_dict(self):
+        return {
+            'auction_id': self.auction_id,
+            'auctioneer_id': self.auctioneer_id,
+            'title': self.title,
+            'description': self.description,
+            'start_time': self.start_time.isoformat(),
+            'end_time': self.end_time.isoformat(),
+            'starting_bid': self.starting_bid,
+            'current_bid': self.current_bid,
+        }
 
     def __repr__(self):
         return f"Auction('{self.title}', '{self.start_time}', '{self.end_time}')"
@@ -130,6 +151,7 @@ def create_auction():
     db.session.add(auction)
     db.session.commit()
     return jsonify({"message": "Auction created successfully"}), 201
+    
 
 
 @app.route("/logout", methods = ['POST'])
@@ -137,15 +159,40 @@ def create_auction():
 def logout():
     logout_user()
     return jsonify({"message": "Logout Successful"}), 200
-if __name__ == '__main__':
-    app.run(debug= True, port=9000)
+
 
 @app.route("/dashboard", methods=['POST'])
 def fetch_auctions():
-    print("hellooooooooooooooooooooooooooooo")
     data = request.get_json()
     print(data)
-    user = Users.query.filter_by(email=data['email']).first()
-    auctions = Auctions.query.filter_by(auctioneer_id=user.user_id)
-    return jsonify({data: auctions}), 200
+    user = Users.query.filter_by(email=data).first()
+    auctions = Auctions.query.filter_by(auctioneer_id=user.user_id).all()
+    auctions_list = [auction.to_dict() for auction in auctions]
+    print(auctions_list)
+    return jsonify(auctions_list), 200
 
+@app.route("/auctions-page", methods=['POST'])
+def fetch_all_auctions():
+    data = request.get_json()
+    print(data)
+    user = Users.query.filter_by(email=data).first()
+    auctions = Auctions.query.filter(not_(Auctions.auctioneer_id == user.user_id)).all()
+    auctions_list = [auction.to_dict() for auction in auctions]
+    print(auctions_list)
+    return jsonify(auctions_list), 200
+
+@app.route("/place-bid", methods=['POST'])
+def place_bid():
+    data = request.get_json()
+    print(data)
+    user = Users.query.filter_by(email=data["email"]).first()
+    auctions = Auctions.query.filter_by(auction_id = data["auction_id"]).first()
+    bid = Bids(auction_id = auctions.auction_id, user_id = user.user_id, bid_amount = data["bid_amount"], bid_time = data["bid_time"])
+    auctions.current_bid = data["bid_amount"]
+    db.session.add(bid)
+    db.session.commit()
+    return jsonify({"message": "Bid made successfully"}), 201
+    
+
+if __name__ == '__main__':
+    app.run(debug= True, port=9000)

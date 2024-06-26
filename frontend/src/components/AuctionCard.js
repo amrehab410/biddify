@@ -31,7 +31,7 @@ const AuctionCard = ({ title, description, startBid, currentBid, endTime }) => {
       <p className="auction-description">{description}</p>
       <p className="auction-start-bid">Starting Bid: ${startBid}</p>
       <p className="auction-current-bid">
-        Current Bid: ${currentBid || startBid}
+        Current Bid: ${currentBid}
       </p>
       <p className="auction-end-time">Time Remaining: {remainingTime}</p>
     </div>

@@ -3,19 +3,22 @@ import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import Logout from "./Logout";
 import { fetchAuctions } from "../api/auth";
+import AuctionCard from "./AuctionCard";
+
 
 const Dashboard = () => {
   const { authState } = useContext(AuthContext);
   const [email, setEmail] = useState(localStorage.getItem("userEmail"));
+  const [auctions, setAuction] = useState([]);
+
 
   const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetchAuctions(email);
-        const data = response.json();
-        console.log(data);
+        const res = await fetchAuctions(email);
+        setAuction(res)
       } catch (error) {
         console.error("Error fetching auctions:", error);
       }
@@ -34,9 +37,22 @@ const Dashboard = () => {
 
   return (
     <>
-      <div className="App">
+      <div>
         <h1>Welcome, {authState.email}!</h1>
-        <p>This is your dashboard.</p>
+        <h1>Your Auctions</h1>
+        <div className="auctions-list">
+          {auctions.length === 0 && <p>No auctions available</p>}
+          {auctions.map((auction) => (
+            <AuctionCard
+              key={auction.auction_id}
+              title={auction.title}
+              description={auction.description}
+              startBid={auction.starting_bid}
+              currentBid={auction.current_bid}
+              endTime={auction.end_time}
+            />
+          ))}
+        </div>
         <button className="button" onClick={redirectToCreateAuction}>
           Create Auction
         </button>
