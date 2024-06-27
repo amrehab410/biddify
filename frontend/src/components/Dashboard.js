@@ -5,6 +5,24 @@ import Logout from "./Logout";
 import { fetchAuctions } from "../api/auth";
 import AuctionCard from "./AuctionCard";
 
+const bids = [
+    {
+      "title": "Vintage Camera",
+      "description": "A rare vintage camera in excellent condition.",
+      "startBid": 100,
+      "currentBid": 150,
+      "endTime": "2024-07-01T12:00:00Z",
+      "auction-id": 300
+    },
+    {
+      "title": "Antique Vase",
+      "description": "An exquisite antique vase from the 19th century.",
+      "startBid": 200,
+      "currentBid": 250,
+      "endTime": "2024-07-02T15:00:00Z",
+      "auction-id": 310
+    }
+  ]
 
 const Dashboard = () => {
   const { authState } = useContext(AuthContext);
@@ -53,14 +71,14 @@ const Dashboard = () => {
             />
           ))}
         </div>
-        <button className="button" onClick={redirectToCreateAuction}>
+      </div>
+      <div className="App">
+      <button className="button" onClick={redirectToCreateAuction}>
           Create Auction
         </button>
         <button className="button" onClick={redirectToAuctionsPage}>
           Place Bid
         </button>
-      </div>
-      <div className="App">
         <Logout />
       </div>
     </>

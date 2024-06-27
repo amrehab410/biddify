@@ -32,6 +32,11 @@ function Login() {
         }
     };
 
+    const redirectToRegister = () => {
+        navigate("/register");
+    };
+
+
     return (
         <div className="App">
             <form onSubmit={handleSubmit}>
@@ -56,6 +61,7 @@ function Login() {
                         />
                     </div>
                     <button type="submit" className="button">Login</button>
+                    <button type="button" onClick={redirectToRegister} className="button">Register Now</button>
                 </fieldset>
             </form>
         </div>

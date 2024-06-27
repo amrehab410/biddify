@@ -2,14 +2,18 @@ import React, { useState, useEffect } from "react";
 import "./style/BiddingCard.css";
 import { placeBid } from "../api/auth";
 
-
-const BiddingCard = ({ title, description, startBid, currentBid, endTime, auction_id }) => {
-  const [remainingTime, setRemainingTime] = useState('');
-  const [bidAmount, setBidAmount] = useState('');
+const BiddingCard = ({
+  title,
+  description,
+  startBid,
+  currentBid,
+  endTime,
+  auction_id,
+}) => {
+  const [remainingTime, setRemainingTime] = useState("");
+  const [bidAmount, setBidAmount] = useState("");
   const [email, setEmail] = useState(localStorage.getItem("userEmail"));
   const [latestBid, setLatestBid] = useState(currentBid);
-
-
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -33,15 +37,21 @@ const BiddingCard = ({ title, description, startBid, currentBid, endTime, auctio
   };
 
   const handleBid = async () => {
+    const minimumBid = Math.max(startBid, currentBid || 0);
+    if (parseFloat(bidAmount) < minimumBid) {
+      alert(`Your bid must be at least $${minimumBid}`);
+      return;
+    }
+
     const auction_data = {
       auction_id: auction_id,
       email: email,
       bid_amount: bidAmount,
-      bid_time: new Date().toISOString().slice(0, 19).replace('T', ' ')
-    }
-    const response = await placeBid(auction_data)
+      bid_time: new Date().toISOString().slice(0, 19).replace("T", " "),
+    };
+    const response = await placeBid(auction_data);
     if (response.message === "Bid made successfully") {
-      setLatestBid(bidAmount)
+      setLatestBid(bidAmount);
       alert("Bid created!");
     } else {
       alert("Error making bid!");
@@ -62,7 +72,10 @@ const BiddingCard = ({ title, description, startBid, currentBid, endTime, auctio
         onChange={(e) => setBidAmount(e.target.value)}
         className="auction-bid-input"
       />
-      <button onClick={handleBid} className="auction-bid-button">
+      <button
+        onClick={handleBid}
+        className="auction-bid-button"
+      >
         Place Bid
       </button>
     </div>
