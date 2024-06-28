@@ -5,6 +5,8 @@ from flask_login import LoginManager, UserMixin, login_user, current_user, logou
 from flask_cors import CORS
 from config import Config
 from flask import Response
+from werkzeug.security import generate_password_hash, check_password_hash
+
 from sqlalchemy import not_
 
 
@@ -124,8 +126,9 @@ def load_user(user_id):
 @app.route("/register", methods = ['POST'])
 def register():
     data = request.get_json()
-    hashed_password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
-    users = Users(first_name = data['first_name'], last_name = data['last_name'], phone_no = data['phone_num'], email = data['email'], password_hash = data['password'])
+    
+    hashed_password = generate_password_hash(data['password'], method='pbkdf2:sha256')
+    users = Users(first_name = data['first_name'], last_name = data['last_name'], phone_no = data['phone_num'], email = data['email'], password_hash = hashed_password)
     db.session.add(users)
     db.session.commit()
     return jsonify({"message": "User registered successfully"}), 201
@@ -133,8 +136,11 @@ def register():
 @app.route("/login", methods=['POST'])
 def login():
     data = request.get_json()
-    user = Users.query.filter_by(email=data['email']).first()
-    if user and (user.password_hash == data['password']):
+    user = Users.query.filter_by(email = data['email']).first()
+    hashed_password = generate_password_hash(data['password'], 'pbkdf2:sha256')
+    print(hashed_password)
+    print(user.password_hash)
+    if user.password_hash and check_password_hash(user.password_hash, data['password']):
         login_user(user, remember=data.get('remember', False))
         return jsonify({"message": "Login successful"}), 200
     else:

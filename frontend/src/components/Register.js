@@ -1,6 +1,7 @@
 import "./style/register.css";
 import { useState } from "react";
 import { registerUser } from '../api/auth';
+import bcrypt from 'bcryptjs';
 
 import { useNavigate } from "react-router-dom";
 
@@ -22,6 +23,8 @@ function Register() {
     const [email, setEmail] = useState("");
     const [phoneNo, setPhoneNo] = useState("");
     const [password, setPassword] = useState("");
+    const [hashedPassword, setHashedPassword] = useState('');
+
     const navigate = useNavigate();
 
     const clearForm = () => {
@@ -44,6 +47,7 @@ function Register() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         const userData = { first_name: firstName, last_name: lastName, phone_num: phoneNo, email: email, password: password.value };
         const response = await registerUser(userData);
         if (response.message === "User registered successfully") {

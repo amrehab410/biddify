@@ -3,11 +3,14 @@ import { loginUser } from "../api/auth";
 import "./style/login.css";
 import { AuthContext } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import bcrypt from 'bcryptjs';
+
 
 function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState({ value: "", isTouched: false });
     const { setAuthState } = useContext(AuthContext);
+
     const navigate = useNavigate();
 
     const clearForm = () => {
@@ -17,6 +20,7 @@ function Login() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         const userData = { email, password: password.value };
         const response = await loginUser(userData);
         console.log(response)
