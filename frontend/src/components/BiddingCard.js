@@ -64,6 +64,7 @@ const BiddingCard = ({
       <p className="auction-description">{description}</p>
       <p className="auction-start-bid">Starting Bid: ${startBid}</p>
       <p className="auction-current-bid">Current Bid: ${latestBid}</p>
+      <p className="auction-current-bid">Buy Now: $</p>
       <p className="auction-end-time">{remainingTime}</p>
       <input
         type="number"
@@ -77,6 +78,12 @@ const BiddingCard = ({
         className="auction-bid-button"
       >
         Place Bid
+      </button>
+      <button
+        onClick={handleBid}
+        className="auction-bid-button"
+      >
+        Buy Now
       </button>
     </div>
   );

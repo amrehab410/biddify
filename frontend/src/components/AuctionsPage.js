@@ -5,18 +5,19 @@ import "./style/AuctionsPage.css";
 import BiddingCard from "./BiddingCard";
 import { fetchAllAuctions } from "../api/auth";
 
-
-
 const AuctionsPage = () => {
   const { authState } = useContext(AuthContext);
   const [email, setEmail] = useState(localStorage.getItem("userEmail"));
-  const [auctions, setAuction] = useState([]);
+  const [auctions, setAuctions] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredAuctions, setFilteredAuctions] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await fetchAllAuctions(email);
-        setAuction(res)
+        setAuctions(res);
+        setFilteredAuctions(res); // Initialize filteredAuctions with all auctions
       } catch (error) {
         console.error("Error fetching auctions:", error);
       }
@@ -25,13 +26,35 @@ const AuctionsPage = () => {
     fetchData();
   }, [email]);
 
+  const handleSearch = () => {
+    const filtered = auctions.filter((auction) =>
+      auction.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredAuctions(filtered);
+  };
+
   return (
     <div className="auctions-page">
       <h1>Available Auctions</h1>
+      <div className="App">
+        <div className="search-container">
+          <input
+            type="text"
+            className="search-bar"
+            placeholder="Search for auctions..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+          <button className="search-button" onClick={handleSearch}>
+            Search
+          </button>
+        </div>
+      </div>
       <div className="auctions-list">
-        {auctions.length === 0 && <p>No auctions available</p>}
-        {auctions.map((auction) => (
+        {filteredAuctions.length === 0 && <p>No auctions available</p>}
+        {filteredAuctions.map((auction) => (
           <BiddingCard
+            key={auction.auction_id}
             auction_id={auction.auction_id}
             title={auction.title}
             description={auction.description}
