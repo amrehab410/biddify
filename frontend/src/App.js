@@ -10,6 +10,7 @@ import CreateAuction from './components/CreateAuction';
 import './App.css'
 import AuctionsPage from './components/AuctionsPage';
 import Navbar from "./components/Navbar";
+import LandingPage from './components/LandingPage';
 
 function App() {
     return (
@@ -20,6 +21,7 @@ function App() {
                     <Route path="/login" element={<Login />} />
                     <Route path="/register" element={<Register />} />
                     <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+                    <Route path="/about" element={<PrivateRoute><LandingPage /></PrivateRoute>} />
                     <Route path="/create-auction" element={<PrivateRoute><CreateAuction /></PrivateRoute>} />
                     <Route path="/auctions-page" element={<PrivateRoute><AuctionsPage /></PrivateRoute>} />
                     <Route path="/" element={<Home />} />

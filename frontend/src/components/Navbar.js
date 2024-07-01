@@ -5,7 +5,7 @@ import "./style/Navbar.css";
 import logo from "./style/Pics/logo.png";
 
 const Navbar = () => {
-  const { setAuthState } = useContext(AuthContext);
+  const { authState , setAuthState} = useContext(AuthContext);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -17,10 +17,9 @@ const Navbar = () => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("userEmail");
     setAuthState({ isAuthenticated: false, token: null, email: null });
-    navigate("/login");
+    navigate("/");
   };
-
-  return (
+  return authState.isAuthenticated ? (
     <nav className="navbar">
       <div className="logo-container">
         <img src={logo} alt="Logo" className="logo" />
@@ -29,15 +28,35 @@ const Navbar = () => {
         <Link to="/dashboard" className={getButtonClass("/dashboard")}>
           Dashboard
         </Link>
-        <Link to="/create-auction" className={getButtonClass("/create-auction")}>
+        <Link
+          to="/create-auction"
+          className={getButtonClass("/create-auction")}
+        >
           Create Auction
         </Link>
         <Link to="/auctions-page" className={getButtonClass("/auctions-page")}>
           Auctions
         </Link>
+        <Link to="/about" className={getButtonClass("/about")}>
+          About
+        </Link>
         <button className="nav-button" onClick={handleLogout}>
           Logout
         </button>
+      </div>
+    </nav>
+  ) : (
+    <nav className="navbar">
+      <div className="logo-container">
+        <img src={logo} alt="Logo" className="logo" />
+      </div>
+      <div className="nav-links">
+        <Link to="/login" className={getButtonClass("/login")}>
+          Login
+        </Link>
+        <Link to="/register" className={getButtonClass("/register")}>
+          Register
+        </Link>
       </div>
     </nav>
   );
