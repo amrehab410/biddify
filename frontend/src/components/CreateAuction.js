@@ -12,6 +12,7 @@ const CreateAuction = () => {
   const [description, setDescription] = useState("");
   const [endTime, setEndTime] = useState("");
   const [startBid, setStartBid] = useState(0);
+  const [buyNowPrice, setBuyNowPrice] = useState(0);
   const [remainingTimes, setRemainingTimes] = useState([]);
   const navigate = useNavigate();
 
@@ -40,14 +41,21 @@ const CreateAuction = () => {
     setTitle("");
     setDescription("");
     setEndTime("");
-    setStartBid("");
+    setStartBid(0);
+    setBuyNowPrice(0);
   };
 
   const handleSubmit = async (e) => {
 
     e.preventDefault();
-    if (!title || !description || !endTime || !startBid) {
+    if (!buyNowPrice || !title || !description || !endTime || !startBid) {
       alert("Please fill out all fields.");
+      return;
+    }
+    if (Number(startBid) > Number(buyNowPrice)) {
+      console.log(startBid)
+      console.log(buyNowPrice)
+      alert("The buy now price needs to be at more than the starting bid.");
       return;
     }
     const newAuction = {
@@ -56,6 +64,7 @@ const CreateAuction = () => {
       description,
       endTime,
       startBid,
+      buyNowPrice,
       startTime: new Date().toISOString().slice(0, 19).replace('T', ' ')
     };
 
@@ -115,6 +124,15 @@ const CreateAuction = () => {
             placeholder="Starting Bid ..."
             value={startBid}
             onChange={e => setStartBid(e.target.value)}
+          />
+          <label className="label">
+            Buy Now Price <sup>*</sup>
+          </label>
+          <input
+            type="number"
+            placeholder="Buy Now Price ..."
+            value={buyNowPrice}
+            onChange={e => setBuyNowPrice(e.target.value)}
           />
           <label className="label">
             Auction End Time <sup>*</sup>

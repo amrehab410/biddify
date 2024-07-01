@@ -5,9 +5,10 @@ from flask_login import LoginManager, UserMixin, login_user, current_user, logou
 from flask_cors import CORS
 from config import Config
 from flask import Response
+
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from sqlalchemy import not_
+from sqlalchemy import not_, desc
 
 
 
@@ -36,7 +37,6 @@ class Users(db.Model, UserMixin):
     phone_no = db.Column(db.String(255), nullable=False)
     auctions = db.relationship("Auctions", back_populates="auctioneer")
     bids = db.relationship("Bids", back_populates="bidder")
-    payments = db.relationship("Payments", back_populates="user")
     user_auctions = db.relationship("UserAuctions", back_populates="user")
 
     def get_id(self):
@@ -56,6 +56,7 @@ class Auctions(db.Model):
     end_time = db.Column(db.DateTime, nullable=False)
     starting_bid = db.Column(db.Float, nullable=False)
     current_bid = db.Column(db.Float, nullable=True)
+    buy_now_price = db.Column(db.Float, nullable=True)
     auctioneer = db.relationship("Users", back_populates="auctions")
     bids = db.relationship("Bids", back_populates="auction")
     user_auctions = db.relationship("UserAuctions", back_populates="auction")
@@ -70,6 +71,7 @@ class Auctions(db.Model):
             'end_time': self.end_time.isoformat(),
             'starting_bid': self.starting_bid,
             'current_bid': self.current_bid,
+            'buy_now_price': self.buy_now_price,
         }
 
     def __repr__(self):
@@ -86,24 +88,17 @@ class Bids(db.Model):
     auction = db.relationship("Auctions", back_populates="bids")
     bidder = db.relationship("Users", back_populates="bids")
 
+    def to_dict(self):
+        return {
+            'bid_id': self.bid_id,
+            'auction_id': self.auction_id,
+            'user_id': self.user_id,
+            'bid_amount': self.bid_amount,
+            'bid_time': self.bid_time.isoformat(),
+        }
+
     def __repr__(self):
         return f"Bid('{self.bid_amount}', '{self.bid_time}')"
-
-
-class Payments(db.Model):
-    __tablename__ = 'payments'
-    payment_id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
-    payment_amount = db.Column(db.Float, nullable=False)
-    payment_time = db.Column(db.DateTime, nullable=False)
-    payment_method = db.Column(db.String(255), nullable=False)
-    card_number = db.Column(db.String(255), nullable=True)
-    expiry_date = db.Column(db.Date, nullable=True)
-    user = db.relationship("Users", back_populates="payments")
-
-    def __repr__(self):
-        return f"Payment('{self.payment_amount}', '{self.payment_time}')"
-
 
 class UserAuctions(db.Model):
     __tablename__ = 'user_auctions'
@@ -153,24 +148,20 @@ def create_auction():
     user = Users.query.filter_by(email=data['email']).first()
     auction = Auctions(auctioneer_id= user.user_id, title = data['title'],
                        description=data['description'], start_time = data['startTime'],
-                       end_time = data['endTime'], starting_bid = data['startBid'], current_bid = 0)
+                       end_time = data['endTime'], buy_now_price = data['buyNowPrice'], starting_bid = data['startBid'], current_bid = 0)
     db.session.add(auction)
     db.session.commit()
     return jsonify({"message": "Auction created successfully"}), 201
     
-
-
 @app.route("/logout", methods = ['POST'])
 @login_required
 def logout():
     logout_user()
     return jsonify({"message": "Logout Successful"}), 200
 
-
 @app.route("/dashboard", methods=['POST'])
 def fetch_auctions():
     data = request.get_json()
-    print(data)
     user = Users.query.filter_by(email=data).first()
     auctions = Auctions.query.filter_by(auctioneer_id=user.user_id).all()
     auctions_list = [auction.to_dict() for auction in auctions]
@@ -180,17 +171,14 @@ def fetch_auctions():
 @app.route("/auctions-page", methods=['POST'])
 def fetch_all_auctions():
     data = request.get_json()
-    print(data)
     user = Users.query.filter_by(email=data).first()
     auctions = Auctions.query.filter(not_(Auctions.auctioneer_id == user.user_id)).all()
     auctions_list = [auction.to_dict() for auction in auctions]
-    print(auctions_list)
     return jsonify(auctions_list), 200
 
 @app.route("/place-bid", methods=['POST'])
 def place_bid():
     data = request.get_json()
-    print(data)
     user = Users.query.filter_by(email=data["email"]).first()
     auctions = Auctions.query.filter_by(auction_id = data["auction_id"]).first()
     bid = Bids(auction_id = auctions.auction_id, user_id = user.user_id, bid_amount = data["bid_amount"], bid_time = data["bid_time"])
@@ -198,7 +186,50 @@ def place_bid():
     db.session.add(bid)
     db.session.commit()
     return jsonify({"message": "Bid made successfully"}), 201
-    
+
+@app.route("/fetch-bid", methods=['POST'])
+def fetch_bid():
+    data = request.get_json()
+    user = Users.query.filter_by(email=data).first()
+    bids = Bids.query.filter_by(user_id=user.user_id).order_by(desc(Bids.bid_time)).all()
+    latest_bids = {}
+    for bid in bids:
+        if bid.auction_id not in latest_bids:
+            latest_bids[bid.auction_id] = bid
+    auction_ids = [bid.auction_id for bid in latest_bids.values()]
+    auctions = Auctions.query.filter(Auctions.auction_id.in_(auction_ids)).all()
+    auction_dict = {auction.auction_id: auction for auction in auctions}
+    results = []
+    for bid in latest_bids.values():
+        auction = auction_dict[bid.auction_id]
+        auction_status = "Winning" if auction.current_bid == bid.bid_amount else "Losing"
+        result = {
+            "bid_amount": bid.bid_amount,
+            "title": auction.title,
+            "auction_id": auction.auction_id,
+            "description": auction.description,
+            "current_bid": auction.current_bid,
+            "starting_bid": auction.starting_bid,
+            "buy_now_price": auction.buy_now_price,
+            "status": auction_status,
+            "end_time": auction.end_time
+        }
+        results.append(result)
+
+    return jsonify(results), 200
+
+@app.route("/place-buy", methods=['POST'])
+def place_buy():
+    data = request.get_json()
+    print(data)
+    user = Users.query.filter_by(email=data["email"]).first()
+    auctions = Auctions.query.filter_by(auction_id = data["auction_id"]).first()
+    bid = Bids(auction_id = auctions.auction_id, user_id = user.user_id, bid_amount = auctions.buy_now_price, bid_time = data["bid_time"])
+    auctions.current_bid = auctions.buy_now_price
+    auctions.end_time = data["bid_time"]
+    db.session.add(bid)
+    db.session.commit()
+    return jsonify({"message": "Purchase successful"}), 201
 
 if __name__ == '__main__':
     app.run(debug= True, port=9000)

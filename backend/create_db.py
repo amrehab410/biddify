@@ -15,7 +15,6 @@ class User(Base):
     phone_no = Column(String(255), nullable=False)
     auctions = relationship("Auction", back_populates="auctioneer")
     bids = relationship("Bid", back_populates="bidder")
-    payments = relationship("Payment", back_populates="user")
     user_auctions = relationship("UserAuction", back_populates="user")
 
 class Auction(Base):
@@ -28,6 +27,7 @@ class Auction(Base):
     end_time = Column(DateTime, nullable=False)
     starting_bid = Column(Float, nullable=False)
     current_bid = Column(Float, nullable=True)
+    buy_now_price = Column(Float, nullable=True)
     auctioneer = relationship("User", back_populates="auctions")
     bids = relationship("Bid", back_populates="auction")
     user_auctions = relationship("UserAuction", back_populates="auction")
@@ -42,17 +42,6 @@ class Bid(Base):
     auction = relationship("Auction", back_populates="bids")
     bidder = relationship("User", back_populates="bids")
 
-class Payment(Base):
-    __tablename__ = 'payments'
-    payment_id = Column(Integer, primary_key=True)
-    user_id = Column(Integer, ForeignKey('users.user_id'), nullable=False)
-    payment_amount = Column(Float, nullable=False)
-    payment_time = Column(DateTime, nullable=False)
-    payment_method = Column(String(255), nullable=False)
-    card_number = Column(String(255), nullable=True)
-    expiry_date = Column(Date, nullable=True)
-    user = relationship("User", back_populates="payments")
-
 class UserAuction(Base):
     __tablename__ = 'user_auctions'
     user_auction_id = Column(Integer, primary_key=True)
@@ -61,20 +50,12 @@ class UserAuction(Base):
     user = relationship("User", back_populates="user_auctions")
     auction = relationship("Auction", back_populates="user_auctions")
 
-# Create an engine
-# Replace 'username', 'password', 'hostname', and 'database_name' with your MySQL credentials and database name.
 engine = create_engine(Config.SQLALCHEMY_DATABASE_URI)
 
-# Create all tables in the engine
 Base.metadata.create_all(engine)
 
-# Create a configured "Session" class
 Session = sessionmaker(bind=engine)
 
-# Create a Session
 session = Session()
 
-# Optionally, you can add initial data here
-
-# Commit the transaction
 session.commit()

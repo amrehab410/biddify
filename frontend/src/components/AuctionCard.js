@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./style/AuctionCard.css";
 
-const AuctionCard = ({ title, description, startBid, currentBid, endTime }) => {
+const AuctionCard = ({ title, description, startBid, buyNowPrice, currentBid, endTime }) => {
   const [remainingTime, setRemainingTime] = useState("");
 
   useEffect(() => {
@@ -32,6 +32,9 @@ const AuctionCard = ({ title, description, startBid, currentBid, endTime }) => {
       <p className="auction-start-bid">Starting Bid: ${startBid}</p>
       <p className="auction-current-bid">
         Current Bid: ${currentBid}
+      </p>
+      <p className="auction-current-bid">
+        Buy Now Price: ${buyNowPrice}
       </p>
       <p className="auction-end-time">Time Remaining: {remainingTime}</p>
     </div>

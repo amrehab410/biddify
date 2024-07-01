@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./style/BiddingCard.css";
-import { placeBid } from "../api/auth";
+import { placeBid, placeBuyNow } from "../api/auth";
 
 const BiddingCard = ({
   title,
@@ -9,6 +9,8 @@ const BiddingCard = ({
   currentBid,
   endTime,
   auction_id,
+  buyNowPrice,
+  status
 }) => {
   const [remainingTime, setRemainingTime] = useState("");
   const [bidAmount, setBidAmount] = useState("");
@@ -49,6 +51,7 @@ const BiddingCard = ({
       bid_amount: bidAmount,
       bid_time: new Date().toISOString().slice(0, 19).replace("T", " "),
     };
+    console.log(auction_data);
     const response = await placeBid(auction_data);
     if (response.message === "Bid made successfully") {
       setLatestBid(bidAmount);
@@ -58,13 +61,32 @@ const BiddingCard = ({
     }
   };
 
+  const handleBuyNow = async () => {
+
+    const auctionData = {
+      auction_id: auction_id,
+      email: email,
+      bid_time: new Date().toISOString().slice(0, 19).replace("T", " "),
+    };
+    console.log(auctionData);
+
+    const response = await placeBuyNow(auctionData);
+    if (response.message === "Purchase successful") {
+      setLatestBid(bidAmount);
+      alert("Purchase successful");
+    } else {
+      alert("Error purchasing!");
+    }
+  };
+
   return (
     <div className="auction-card">
       <h3 className="auction-title">{title}</h3>
       <p className="auction-description">{description}</p>
       <p className="auction-start-bid">Starting Bid: ${startBid}</p>
       <p className="auction-current-bid">Current Bid: ${latestBid}</p>
-      <p className="auction-current-bid">Buy Now: $</p>
+      <p className="auction-current-bid">Buy Now: ${buyNowPrice}</p>
+      <p className="auction-current-bid">Status: {status}</p>
       <p className="auction-end-time">{remainingTime}</p>
       <input
         type="number"
@@ -80,7 +102,7 @@ const BiddingCard = ({
         Place Bid
       </button>
       <button
-        onClick={handleBid}
+        onClick={handleBuyNow}
         className="auction-bid-button"
       >
         Buy Now

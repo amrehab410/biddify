@@ -14,4 +14,8 @@ export const fetchAllAuctions = async (email) => request('/auctions-page', 'POST
 
 export const placeBid = async (userData) => request('/place-bid', 'POST', userData);
 
+export const fetchBid = async (email) => request('/fetch-bid', 'POST', email);
+
+export const placeBuyNow = async (userData) => request('/place-buy', 'POST', userData);
+
 

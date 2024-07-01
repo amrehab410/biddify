@@ -3,7 +3,7 @@ import { AuthContext } from "../context/AuthContext";
 import AuctionCard from "./AuctionCard";
 import "./style/AuctionsPage.css";
 import BiddingCard from "./BiddingCard";
-import { fetchAllAuctions } from "../api/auth";
+import { fetchAllAuctions, placeBuyNow } from "../api/auth";
 
 const AuctionsPage = () => {
   const { authState } = useContext(AuthContext);
@@ -17,7 +17,7 @@ const AuctionsPage = () => {
       try {
         const res = await fetchAllAuctions(email);
         setAuctions(res);
-        setFilteredAuctions(res); // Initialize filteredAuctions with all auctions
+        setFilteredAuctions(res);
       } catch (error) {
         console.error("Error fetching auctions:", error);
       }
@@ -59,6 +59,7 @@ const AuctionsPage = () => {
             title={auction.title}
             description={auction.description}
             startBid={auction.starting_bid}
+            buyNowPrice={auction.buy_now_price}
             currentBid={auction.current_bid}
             endTime={auction.end_time}
           />
