@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:9000';
+const API_URL = 'https://amrehab410.pythonanywhere.com/';
 
 const request = async (url, method, body = null) => {
     const headers = { 'Content-Type': 'application/json' };
