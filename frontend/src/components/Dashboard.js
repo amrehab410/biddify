@@ -12,7 +12,6 @@ const Dashboard = () => {
   const [auctions, setAuction] = useState([]);
   const [bids, setBids] = useState([]);
 
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -24,18 +23,23 @@ const Dashboard = () => {
     };
 
     fetchData();
-    const fetchBids = async () => {
-      try {
-        const res = await fetchBid(email);
-        setBids(res);
-        console.log(res)
-      } catch (error) {
-        console.error("Error fetching bids:", error);
-      }
-    };
-
-    fetchBids();
   }, [email]);
+
+  const fetchBids = async () => {
+    try {
+      const res = await fetchBid(email);
+      setBids(res);
+      console.log(res);
+    } catch (error) {
+      console.error("Error fetching bids:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "bids") {
+      fetchBids();
+    }
+  }, [activeTab]);
 
   return (
     <div>
@@ -71,7 +75,6 @@ const Dashboard = () => {
                 buyNowPrice={auction.buy_now_price}
                 currentBid={auction.current_bid}
                 endTime={auction.end_time}
-
               />
             ))}
           </div>
@@ -81,6 +84,7 @@ const Dashboard = () => {
         <>
           <h2>Your Bids</h2>
           <div className="auctions-list">
+            {bids.length === 0 && <p>No bids available</p>}
             {bids.map((bid) => (
               <BiddingCard
                 key={bid.auction_id}

@@ -41,17 +41,32 @@ body {
   }
   
   .hero-section {
-    padding: 100px 16px;
-    background-color: #0e101c;
+    position: relative;
     color: white;
   }
   
-  .hero-section h1 {
-    font-size: 3em;
+  .cover {
+    width: 100%;
+    height: auto;
   }
   
-  .hero-section p {
+  .hero-content {
+    padding: 20px;
+    background-color: #0e101c;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px; /* Added gap to control spacing */
+  }
+  
+  .hero-content h1 {
+    font-size: 3em;
+    margin: 0.5em 0;
+  }
+  
+  .hero-content p {
     font-size: 1.5em;
+    margin: 0.5em 0;
   }
   
   .cta-button {
@@ -70,6 +85,7 @@ body {
   .about-section, .features-section {
     padding: 50px 16px;
     background-color: #0e101c;
+    color: white;
   }
   
   .about-section h2, .features-section h2 {
@@ -81,6 +97,7 @@ body {
     display: flex;
     justify-content: center;
     gap: 40px;
+    flex-wrap: wrap;
   }
   
   .feature {
@@ -95,7 +112,7 @@ body {
   
   .feature p {
     font-size: 1em;
-    color: #555;
+    color: #d3d3d3;
   }
   
   .footer {
@@ -107,3 +124,47 @@ body {
   .footer p {
     margin: 0;
   }
+  
+  .project-about-section {
+    padding: 50px 16px;
+    background-color: #0e101c;
+    color: white;
+  }
+  
+  .project-about-section h2 {
+    font-size: 2em;
+    margin-bottom: 20px;
+  }
+  
+  .team-members {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+  }
+  
+  .team-member {
+    max-width: 300px;
+    text-align: left;
+  }
+  
+  .team-member h3 {
+    font-size: 1.5em;
+    margin-bottom: 10px;
+  }
+  
+  .team-member p {
+    font-size: 1em;
+    color: #d3d3d3;
+  }
+  
+  .project-about-section a {
+    color: #23d6f5;
+    text-decoration: none;
+  }
+  
+  .project-about-section a:hover {
+    text-decoration: underline;
+  }
+  

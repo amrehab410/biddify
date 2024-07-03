@@ -10,7 +10,7 @@ const BiddingCard = ({
   endTime,
   auction_id,
   buyNowPrice,
-  status
+  status,
 }) => {
   const [remainingTime, setRemainingTime] = useState("");
   const [bidAmount, setBidAmount] = useState("");
@@ -56,13 +56,13 @@ const BiddingCard = ({
     if (response.message === "Bid made successfully") {
       setLatestBid(bidAmount);
       alert("Bid created!");
+      setBidAmount("");
     } else {
       alert("Error making bid!");
     }
   };
 
   const handleBuyNow = async () => {
-
     const auctionData = {
       auction_id: auction_id,
       email: email,
@@ -80,13 +80,34 @@ const BiddingCard = ({
   };
 
   return (
-    <div className="auction-card">
+    <div
+      className={`auction-card ${
+        remainingTime === "Auction ended"
+          ? ""
+          : status === "Winning"
+          ? "winning"
+          : status === "Losing"
+          ? "losing"
+          : ""
+      }`}
+    >
       <h3 className="auction-title">{title}</h3>
       <p className="auction-description">{description}</p>
       <p className="auction-start-bid">Starting Bid: ${startBid}</p>
       <p className="auction-current-bid">Current Bid: ${latestBid}</p>
       <p className="auction-current-bid">Buy Now: ${buyNowPrice}</p>
-      <p className="auction-current-bid">Status: {status}</p>
+      {status ? (
+        <p className="auction-status">
+          Status:{" "}
+          {remainingTime === "Auction ended"
+            ? status === "Winning"
+              ? "You won this bid"
+              : "You lost this bid"
+            : `You're currently ${status}`}
+        </p>
+      ) : (
+        ""
+      )}
       <p className="auction-end-time">{remainingTime}</p>
       <input
         type="number"
@@ -95,16 +116,10 @@ const BiddingCard = ({
         onChange={(e) => setBidAmount(e.target.value)}
         className="auction-bid-input"
       />
-      <button
-        onClick={handleBid}
-        className="auction-bid-button"
-      >
+      <button onClick={handleBid} className="auction-bid-button">
         Place Bid
       </button>
-      <button
-        onClick={handleBuyNow}
-        className="auction-bid-button"
-      >
+      <button onClick={handleBuyNow} className="auction-bid-button">
         Buy Now
       </button>
     </div>

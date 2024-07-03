@@ -1,3 +1,5 @@
+/* BiddingCard.css */
+
 .auction-card {
     background-color: #0e101c;
     border: 2px solid #23d6f5;
@@ -6,7 +8,15 @@
     border-radius: 12px;
     color: #ffffff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s;
+    transition: transform 0.2s, border-color 0.2s, color 0.2s;
+  }
+  
+  .auction-card.winning {
+    border-color: #28a745;
+  }
+  
+  .auction-card.losing {
+    border-color: #dc3545;
   }
   
   .auction-card:hover {
@@ -34,9 +44,24 @@
   
   .auction-start-bid::before,
   .auction-current-bid::before,
-  .auction-end-time::before {
+  .auction-end-time::before,
+  .auction-status::before {
     content: "• ";
-    color: #23d6f5;
+    transition: color 0.2s;
+  }
+  
+  .auction-card.winning .auction-start-bid::before,
+  .auction-card.winning .auction-current-bid::before,
+  .auction-card.winning .auction-end-time::before,
+  .auction-card.winning .auction-status::before {
+    color: #1fd84a;
+  }
+  
+  .auction-card.losing .auction-start-bid::before,
+  .auction-card.losing .auction-current-bid::before,
+  .auction-card.losing .auction-end-time::before,
+  .auction-card.losing .auction-status::before {
+    color: #dc3545;
   }
   
   .auction-bid-input {
@@ -66,3 +91,9 @@
   .auction-bid-button:hover {
     background-color: #1dabc4;
   }
+  
+  .auction-status {
+    font-size: 1em;
+    margin-top: 8px;
+  }
+  
