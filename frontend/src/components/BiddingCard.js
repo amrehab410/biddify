@@ -44,22 +44,28 @@ const BiddingCard = ({
       alert(`Your bid must be at least $${minimumBid}`);
       return;
     }
-
-    const auction_data = {
-      auction_id: auction_id,
-      email: email,
-      bid_amount: bidAmount,
-      bid_time: new Date().toISOString().slice(0, 19).replace("T", " "),
-    };
-    console.log(auction_data);
-    const response = await placeBid(auction_data);
-    if (response.message === "Bid made successfully") {
-      setLatestBid(bidAmount);
-      alert("Bid created!");
-      setBidAmount("");
-    } else {
-      alert("Error making bid!");
+    if (parseFloat(bidAmount) < buyNowPrice) {
+      const auction_data = {
+        auction_id: auction_id,
+        email: email,
+        bid_amount: bidAmount,
+        bid_time: new Date().toISOString().slice(0, 19).replace("T", " "),
+      };
+      console.log(auction_data);
+      const response = await placeBid(auction_data);
+      if (response.message === "Bid made successfully") {
+        setLatestBid(bidAmount);
+        alert("Bid created!");
+        setBidAmount("");
+      } else {
+        alert("Error making bid!");
+      }
     }
+    else if ((parseFloat(bidAmount) >= buyNowPrice)) {
+      handleBuyNow()
+    }
+
+
   };
 
   const handleBuyNow = async () => {
@@ -81,15 +87,14 @@ const BiddingCard = ({
 
   return (
     <div
-      className={`auction-card ${
-        remainingTime === "Auction ended"
-          ? ""
-          : status === "Winning"
+      className={`auction-card ${remainingTime === "Auction ended"
+        ? ""
+        : status === "Winning"
           ? "winning"
           : status === "Losing"
-          ? "losing"
-          : ""
-      }`}
+            ? "losing"
+            : ""
+        }`}
     >
       <h3 className="auction-title">{title}</h3>
       <p className="auction-description">{description}</p>
@@ -109,19 +114,23 @@ const BiddingCard = ({
         ""
       )}
       <p className="auction-end-time">{remainingTime}</p>
-      <input
-        type="number"
-        placeholder="Enter your bid"
-        value={bidAmount}
-        onChange={(e) => setBidAmount(e.target.value)}
-        className="auction-bid-input"
-      />
-      <button onClick={handleBid} className="auction-bid-button">
-        Place Bid
-      </button>
-      <button onClick={handleBuyNow} className="auction-bid-button">
-        Buy Now
-      </button>
+      {remainingTime !== "Auction ended" && (
+        <>
+          <input
+            type="number"
+            placeholder="Enter your bid"
+            value={bidAmount}
+            onChange={(e) => setBidAmount(e.target.value)}
+            className="auction-bid-input"
+          />
+          <button onClick={handleBid} className="auction-bid-button">
+            Place Bid
+          </button>
+          <button onClick={handleBuyNow} className="auction-bid-button">
+            Buy Now
+          </button>
+        </>
+      )}
     </div>
   );
 };

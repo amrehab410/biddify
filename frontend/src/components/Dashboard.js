@@ -11,12 +11,15 @@ const Dashboard = () => {
   const [email, setEmail] = useState(localStorage.getItem("userEmail"));
   const [auctions, setAuction] = useState([]);
   const [bids, setBids] = useState([]);
+  const [name, setName] = useState([]);
+
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const res = await fetchAuctions(email);
-        setAuction(res);
+        setAuction(res.auctions);
+        setName(res.message);
       } catch (error) {
         console.error("Error fetching auctions:", error);
       }
@@ -43,7 +46,7 @@ const Dashboard = () => {
 
   return (
     <div>
-      <h1>Welcome, {authState.email}!</h1>
+      <h1>Welcome, {name}!</h1>
       <div className="App">
         <div className="navbar">
           <button

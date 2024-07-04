@@ -95,7 +95,6 @@ const CreateAuction = () => {
   return (
     <>
       <div className="App">
-        <h1>Welcome, {authState.email}!</h1>
         <form onSubmit={handleSubmit}>
           <h2>Create your Auction</h2>
           <label className="label">
@@ -155,9 +154,7 @@ const CreateAuction = () => {
           </div>
         ))}
       </div>
-      <div className="App">
-        <Logout />
-      </div>
+
     </>
   );
 };

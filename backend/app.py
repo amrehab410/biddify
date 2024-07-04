@@ -112,7 +112,6 @@ class UserAuctions(db.Model):
         return f"UserAuction('User ID: {self.user_id}', 'Auction ID: {self.auction_id}')"
 
 
-
 @login_manager.user_loader
 def load_user(user_id):
     return Users.query.get(int(user_id))
@@ -121,7 +120,9 @@ def load_user(user_id):
 @app.route("/register", methods = ['POST'])
 def register():
     data = request.get_json()
-    
+    user = Users.query.filter_by(email = data['email']).first()
+    if(user):
+        return jsonify({"message": "User with this Email already exists"}), 201
     hashed_password = generate_password_hash(data['password'], method='pbkdf2:sha256')
     users = Users(first_name = data['first_name'], last_name = data['last_name'], phone_no = data['phone_num'], email = data['email'], password_hash = hashed_password)
     db.session.add(users)
@@ -133,8 +134,6 @@ def login():
     data = request.get_json()
     user = Users.query.filter_by(email = data['email']).first()
     hashed_password = generate_password_hash(data['password'], 'pbkdf2:sha256')
-    print(hashed_password)
-    print(user.password_hash)
     if user.password_hash and check_password_hash(user.password_hash, data['password']):
         login_user(user, remember=data.get('remember', False))
         return jsonify({"message": "Login successful"}), 200
@@ -144,7 +143,6 @@ def login():
 @app.route("/create-auction", methods=['POST'])
 def create_auction():
     data = request.get_json()
-    print(data)
     user = Users.query.filter_by(email=data['email']).first()
     auction = Auctions(auctioneer_id= user.user_id, title = data['title'],
                        description=data['description'], start_time = data['startTime'],
@@ -165,8 +163,7 @@ def fetch_auctions():
     user = Users.query.filter_by(email=data).first()
     auctions = Auctions.query.filter_by(auctioneer_id=user.user_id).all()
     auctions_list = [auction.to_dict() for auction in auctions]
-    print(auctions_list)
-    return jsonify(auctions_list), 200
+    return jsonify({"auctions": auctions_list,"message":user.first_name}), 200
 
 @app.route("/auctions-page", methods=['POST'])
 def fetch_all_auctions():

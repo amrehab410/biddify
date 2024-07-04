@@ -1,7 +1,6 @@
 import "./style/register.css";
 import { useState } from "react";
 import { registerUser } from "../api/auth";
-import bcrypt from "bcryptjs";
 
 import { useNavigate } from "react-router-dom";
 
@@ -24,6 +23,8 @@ function Register() {
   const [email, setEmail] = useState("");
   const [phoneNo, setPhoneNo] = useState("");
   const [password, setPassword] = useState("");
+  const [emailError, setEmailError] = useState(false);
+  const [passwordError, setPasswordError] = useState(false);
   const [hashedPassword, setHashedPassword] = useState("");
 
   const navigate = useNavigate();
@@ -44,11 +45,37 @@ function Register() {
   const validatePassword = (password) => {
     const passwordRegex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    return passwordRegex.test(password);
+    return passwordRegex.test(password.value);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    setEmailError(false);
+    setPasswordError(false);
+
+    // Validate email and password
+    const isEmailValid = validateEmail(email);
+    const isPasswordValid = validatePassword(password);
+    console.log(isEmailValid)
+    console.log(isPasswordValid)
+    console.log(password)
+
+    if (!isEmailValid) {
+      setEmailError(true);
+      return;
+    }
+    else {
+      setEmailError(false);
+    }
+
+    if (!isPasswordValid) {
+      setPasswordError(true);
+      return;
+    }
+    else {
+      setPasswordError(false);
+    }
 
     const userData = {
       first_name: firstName,
@@ -57,13 +84,20 @@ function Register() {
       email: email,
       password: password.value,
     };
+
     const response = await registerUser(userData);
     if (response.message === "User registered successfully") {
       alert("Account created!");
       clearForm();
-    } else {
+    } else if (response.message === "User with this Email already exists") {
+      alert(response.message);
+    }
+
+    else {
       alert("Error creating account");
     }
+
+
   };
 
   return (
@@ -107,6 +141,7 @@ function Register() {
               placeholder="Email address"
               required
             />
+            {emailError && <EmailErrorMessage />}
           </div>
           <div className="Field">
             <label className="label">
@@ -121,6 +156,7 @@ function Register() {
               placeholder="Password"
               required
             />
+            {passwordError && <PasswordErrorMessage />}
           </div>
           <div className="Field">
             <label className="label">
